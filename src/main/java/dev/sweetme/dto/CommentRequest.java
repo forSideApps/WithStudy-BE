@@ -10,6 +10,7 @@ public class CommentRequest {
 
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(max = 50, message = "닉네임은 50자 이내로 입력해주세요.")
+    @Pattern(regexp = "^(?!.*방장).*$", message = "사용할 수 없는 닉네임입니다.")
     private String authorName;
 
     @NotBlank(message = "댓글 내용을 입력해주세요.")

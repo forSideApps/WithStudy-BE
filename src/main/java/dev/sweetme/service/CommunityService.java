@@ -21,12 +21,13 @@ public class CommunityService {
     private final CommunityPostRepository postRepository;
     private final CommunityCommentRepository commentRepository;
 
-    public Page<CommunityPost> findPosts(PostCategory category, int page) {
+    public Page<CommunityPost> findPosts(PostCategory category, String keyword, int page) {
         PageRequest pageable = PageRequest.of(page, 15);
-        if (category == null) {
-            return postRepository.findAllByOrderByCreatedAtDesc(pageable);
-        }
-        return postRepository.findByCategoryOrderByCreatedAtDesc(category, pageable);
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        if (category == null && !hasKeyword) return postRepository.findAllByOrderByCreatedAtDesc(pageable);
+        if (category == null) return postRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
+        if (!hasKeyword) return postRepository.findByCategoryOrderByCreatedAtDesc(category, pageable);
+        return postRepository.findByCategoryAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(category, keyword, pageable);
     }
 
     public CommunityPost findById(Long id) {

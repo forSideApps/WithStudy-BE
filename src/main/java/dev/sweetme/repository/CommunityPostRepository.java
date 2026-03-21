@@ -11,4 +11,8 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
     Page<CommunityPost> findByCategoryOrderByCreatedAtDesc(PostCategory category, Pageable pageable);
 
     Page<CommunityPost> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<CommunityPost> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
+
+    Page<CommunityPost> findByCategoryAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(PostCategory category, String keyword, Pageable pageable);
 }

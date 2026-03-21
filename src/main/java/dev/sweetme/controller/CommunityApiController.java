@@ -23,12 +23,13 @@ public class CommunityApiController {
     @GetMapping
     public Page<PostSummaryDto> getPosts(
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page) {
         PostCategory postCategory = null;
         if (category != null && !category.isBlank()) {
             postCategory = PostCategory.valueOf(category);
         }
-        return communityService.findPosts(postCategory, page)
+        return communityService.findPosts(postCategory, keyword, page)
                 .map(PostSummaryDto::from);
     }
 
