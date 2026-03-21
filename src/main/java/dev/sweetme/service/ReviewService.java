@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -31,9 +32,11 @@ public class ReviewService {
     @Value("${app.admin.password}")
     private String adminPassword;
 
-    @Transactional(readOnly = true)
+    @Value("${app.page.review-size:15}")
+    private int pageSize;
+
     public Page<Review> findReviews(String type, String status, String jobCategory, String careerLevel, String keyword, int page) {
-        var pageable = PageRequest.of(page, 15, Sort.by(Sort.Direction.DESC, "createdAt"));
+        var pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         ReviewType t = parseEnum(type, ReviewType.class);
         ReviewStatus s = parseEnum(status, ReviewStatus.class);
         ReviewJobCategory jc = parseEnum(jobCategory, ReviewJobCategory.class);
@@ -42,7 +45,6 @@ public class ReviewService {
         return reviewRepository.search(t, s, jc, cl, kw, pageable);
     }
 
-    @Transactional(readOnly = true)
     public Review findById(Long id) {
         return reviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
@@ -68,7 +70,6 @@ public class ReviewService {
         return passwordEncoder.matches(rawPassword, findById(id).getPasswordHash());
     }
 
-    @Transactional(readOnly = true)
     public String getPortfolioLink(Long id, String rawPassword, String adminKey) {
         Review review = findById(id);
         boolean isAdmin = adminPassword != null && adminPassword.equals(adminKey);

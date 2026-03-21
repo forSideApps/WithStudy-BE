@@ -8,6 +8,7 @@ import dev.sweetme.dto.CommunityPostRequest;
 import dev.sweetme.repository.CommunityCommentRepository;
 import dev.sweetme.repository.CommunityPostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,11 @@ public class CommunityService {
     private final CommunityPostRepository postRepository;
     private final CommunityCommentRepository commentRepository;
 
+    @Value("${app.page.community-size:15}")
+    private int pageSize;
+
     public Page<CommunityPost> findPosts(PostCategory category, String keyword, int page) {
-        PageRequest pageable = PageRequest.of(page, 15);
+        PageRequest pageable = PageRequest.of(page, pageSize);
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         if (category == null && !hasKeyword) return postRepository.findAllByOrderByCreatedAtDesc(pageable);
         if (category == null) return postRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
@@ -38,10 +42,6 @@ public class CommunityService {
     @Transactional
     public void incrementView(Long id) {
         findById(id).incrementViewCount();
-    }
-
-    public java.util.List<CommunityComment> findComments(Long postId) {
-        return commentRepository.findByPostOrderByCreatedAtAsc(findById(postId));
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import dev.sweetme.domain.RoomApplication;
 import dev.sweetme.domain.enums.ApplicationStatus;
 import dev.sweetme.dto.ApplicationRequest;
 import dev.sweetme.repository.RoomApplicationRepository;
+import dev.sweetme.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class RoomApplicationService {
 
     private final RoomApplicationRepository applicationRepository;
     private final RoomService roomService;
+    private final RoomRepository roomRepository;
 
     public List<RoomApplication> findByRoom(Long roomId) {
         Room room = roomService.findById(roomId);
@@ -31,7 +33,8 @@ public class RoomApplicationService {
 
     @Transactional
     public RoomApplication apply(Long roomId, ApplicationRequest request) {
-        Room room = roomService.findById(roomId);
+        Room room = roomRepository.findByIdWithLock(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("스터디 방을 찾을 수 없습니다."));
         if (room.getStatus() != dev.sweetme.domain.enums.RoomStatus.OPEN) {
             throw new IllegalStateException("모집이 마감된 방입니다.");
         }

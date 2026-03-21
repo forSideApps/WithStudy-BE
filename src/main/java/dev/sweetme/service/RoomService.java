@@ -8,6 +8,7 @@ import dev.sweetme.dto.RoomCreateRequest;
 import dev.sweetme.dto.RoomUpdateRequest;
 import dev.sweetme.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,11 +26,14 @@ public class RoomService {
     private final CompanyService companyService;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Value("${app.page.room-size:10}")
+    private int pageSize;
+
     public Page<Room> findByTheme(Long companyId, String statusFilter, String jobRoleFilter, String keyword, int page) {
         Company company = companyService.findById(companyId);
         return roomRepository.findByThemeFiltered(
                 company, parseStatus(statusFilter), parseJobRole(jobRoleFilter), parseKeyword(keyword),
-                PageRequest.of(page, 10));
+                PageRequest.of(page, pageSize));
     }
 
     public Room findById(Long id) {
@@ -44,7 +48,7 @@ public class RoomService {
     public Page<Room> findAll(String statusFilter, String jobRoleFilter, String keyword, int page) {
         return roomRepository.findAllFiltered(
                 parseStatus(statusFilter), parseJobRole(jobRoleFilter), parseKeyword(keyword),
-                PageRequest.of(page, 10));
+                PageRequest.of(page, pageSize));
     }
 
     @Transactional
