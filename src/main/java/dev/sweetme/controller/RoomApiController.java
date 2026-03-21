@@ -40,7 +40,7 @@ public class RoomApiController {
 
     private String logoBaseUrl() {
         return String.format(
-                "https://objectstorage.%s.oraclecloud.com/n/%s/b/%s/o/sweetme/",
+                "https://objectstorage.%s.oraclecloud.com/n/%s/b/%s/o/SweetMe/",
                 region, namespace, bucket
         );
     }
