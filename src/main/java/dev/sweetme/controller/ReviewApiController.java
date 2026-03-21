@@ -115,7 +115,7 @@ public class ReviewApiController {
 
     @PostMapping("/{id}/link")
     public ResponseEntity<?> getPortfolioLink(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String link = reviewService.getPortfolioLink(id, body.get("password"));
+        String link = reviewService.getPortfolioLink(id, body.get("password"), body.get("adminKey"));
         if (link == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(Map.of("link", link));
     }

@@ -69,9 +69,10 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public String getPortfolioLink(Long id, String rawPassword) {
+    public String getPortfolioLink(Long id, String rawPassword, String adminKey) {
         Review review = findById(id);
-        if (!passwordEncoder.matches(rawPassword, review.getPasswordHash())) {
+        boolean isAdmin = adminPassword != null && adminPassword.equals(adminKey);
+        if (!isAdmin && !passwordEncoder.matches(rawPassword, review.getPasswordHash())) {
             throw new RuntimeException("비밀번호가 올바르지 않습니다.");
         }
         return review.getPortfolioLink();
