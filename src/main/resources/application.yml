@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@clouddb_high
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        format_sql: true
+        default_schema: ${DB_USERNAME}
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+server:
+  port: 21002
+  tomcat:
+    uri-encoding: UTF-8
+
+logging:
+  level:
+    dev.withstudy: INFO
+    org.hibernate.SQL: WARN
+
+app:
+  admin:
+    password: ${ADMIN_PASSWORD:1234}
+  oci:
+    config-file: ~/.oci/config
+    profile: DEFAULT
+    namespace: axw45xvpnfol
+    bucket: MyBucket
+    region: ap-chuncheon-1

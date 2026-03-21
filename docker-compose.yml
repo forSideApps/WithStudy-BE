@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    image: interview-study:latest
+    container_name: interview-app
+    ports:
+      - "21001:21002"
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - TNS_ADMIN=/wallet  # Oracle JDBC가 tnsnames.ora, ojdbc.properties 등 wallet 파일을 찾는 디렉토리
+    volumes:
+      - ./wallet:/wallet:ro
+    restart: unless-stopped

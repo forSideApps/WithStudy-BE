@@ -1,0 +1,32 @@
+### Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+### VS Code
+.vscode/
+
+### OS
+.DS_Store
+Thumbs.db
+
+### Spring Boot
+*.log
+logs/
+
+### Oracle ATP Wallet (절대 커밋 금지 - 인증서 포함)
+wallet/
+
+### Env
+.env
+.env.*
+!.env.example
+application-local.yml
+application-prod.yml
