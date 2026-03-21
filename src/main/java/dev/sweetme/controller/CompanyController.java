@@ -71,6 +71,13 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyDto.from(company, logoBaseUrl()));
     }
 
+    /** 어드민: 회사 순서 일괄 저장 */
+    @PutMapping("/api/admin/companies/order")
+    public ResponseEntity<Void> adminUpdateOrder(@RequestBody List<Long> ids) {
+        companyService.updateOrder(ids);
+        return ResponseEntity.ok().build();
+    }
+
     /** 어드민: 회사 정보 수정 */
     @PatchMapping("/api/admin/companies/{id}")
     public ResponseEntity<CompanyDto> adminUpdate(

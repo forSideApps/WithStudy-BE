@@ -30,6 +30,14 @@ public class CompanyService {
     }
 
     @Transactional
+    public void updateOrder(List<Long> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            Company company = findById(ids.get(i));
+            company.update(company.getName(), company.getSlug(), company.getAccentColor(), i + 1);
+        }
+    }
+
+    @Transactional
     public Company update(Long id, String name, String slug, String accentColor, Integer displayOrder) {
         Company company = findById(id);
         company.update(name, slug, accentColor, displayOrder);
