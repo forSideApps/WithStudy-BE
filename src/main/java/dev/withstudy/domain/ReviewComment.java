@@ -33,7 +33,14 @@ public class ReviewComment {
     @Builder.Default
     private Boolean isAdmin = false;
 
+    @Column(name = "password_hash", length = 100)
+    private String passwordHash;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

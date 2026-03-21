@@ -17,4 +17,6 @@ public class CommentRequest {
     private String content;
 
     private String adminKey;
+
+    private String password;
 }

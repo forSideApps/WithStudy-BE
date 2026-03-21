@@ -1,6 +1,7 @@
 package dev.withstudy.controller;
 
 import dev.withstudy.dto.CommentRequest;
+import dev.withstudy.dto.CommentUpdateRequest;
 import dev.withstudy.dto.ReviewRequest;
 import dev.withstudy.dto.ReviewUpdateRequest;
 import dev.withstudy.dto.response.ReviewDetailDto;
@@ -24,11 +25,12 @@ public class ReviewApiController {
     @GetMapping
     public Page<ReviewSummaryDto> getReviews(
             @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String jobCategory,
             @RequestParam(required = false) String careerLevel,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page) {
-        return reviewService.findReviews(type, jobCategory, careerLevel, keyword, page)
+        return reviewService.findReviews(type, status, jobCategory, careerLevel, keyword, page)
                 .map(ReviewSummaryDto::from);
     }
 
@@ -83,6 +85,32 @@ public class ReviewApiController {
             @RequestBody CommentRequest request) {
         reviewService.addComment(id, request);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/comments/{commentId}")
+    public ResponseEntity<Void> updateComment(
+            @PathVariable Long id,
+            @PathVariable Long commentId,
+            @RequestBody CommentUpdateRequest request) {
+        try {
+            reviewService.updateComment(commentId, request.getPassword(), request.getContent());
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @DeleteMapping("/{id}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long id,
+            @PathVariable Long commentId,
+            @RequestBody Map<String, String> body) {
+        try {
+            reviewService.deleteComment(commentId, body.get("password"));
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/{id}/link")

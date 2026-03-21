@@ -3,6 +3,7 @@ package dev.withstudy.repository;
 import dev.withstudy.domain.Review;
 import dev.withstudy.domain.enums.CareerLevel;
 import dev.withstudy.domain.enums.ReviewJobCategory;
+import dev.withstudy.domain.enums.ReviewStatus;
 import dev.withstudy.domain.enums.ReviewType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r WHERE " +
            "(:type IS NULL OR r.type = :type) " +
+           "AND (:status IS NULL OR r.status = :status) " +
            "AND (:jobCategory IS NULL OR r.jobCategory = :jobCategory) " +
            "AND (:careerLevel IS NULL OR r.careerLevel = :careerLevel) " +
            "AND (:keyword IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -21,6 +23,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
            "ORDER BY r.createdAt DESC")
     Page<Review> search(
             @Param("type") ReviewType type,
+            @Param("status") ReviewStatus status,
             @Param("jobCategory") ReviewJobCategory jobCategory,
             @Param("careerLevel") CareerLevel careerLevel,
             @Param("keyword") String keyword,
