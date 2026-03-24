@@ -130,11 +130,31 @@ public class ReviewService {
     public void rejectExchange(Long exchangeId, String username) {
         ReviewExchange exchange = exchangeRepository.findById(exchangeId)
                 .orElseThrow(() -> new IllegalArgumentException("서로보기 요청을 찾을 수 없습니다."));
+        if (exchange.getStatus() != ExchangeStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 요청입니다.");
+        }
         Review targetReview = findById(exchange.getTargetReviewId());
-        if (!username.equals(targetReview.getMemberUsername())) {
+        String targetOwner = targetReview.getMemberUsername();
+        if (targetOwner == null || !targetOwner.equals(username)) {
             throw new SecurityException("거절 권한이 없습니다.");
         }
         exchange.reject();
+    }
+
+    /** 서로보기 보낸 요청 취소: 요청자만 가능, PENDING 상태인 경우만 */
+    @Transactional
+    public void cancelExchange(Long exchangeId, String username) {
+        ReviewExchange exchange = exchangeRepository.findById(exchangeId)
+                .orElseThrow(() -> new IllegalArgumentException("서로보기 요청을 찾을 수 없습니다."));
+        Review requesterReview = findById(exchange.getRequesterReviewId());
+        String requesterOwner = requesterReview.getMemberUsername();
+        if (requesterOwner == null || !requesterOwner.equals(username)) {
+            throw new SecurityException("취소 권한이 없습니다.");
+        }
+        if (exchange.getStatus() != ExchangeStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 요청입니다.");
+        }
+        exchangeRepository.delete(exchange);
     }
 
     @Transactional

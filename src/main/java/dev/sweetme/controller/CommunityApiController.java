@@ -10,6 +10,7 @@ import dev.sweetme.util.SessionHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +60,15 @@ public class CommunityApiController {
         if (memberUsername != null) request.setAuthorName(memberUsername);
         var post = communityService.createPost(request, memberUsername);
         return ResponseEntity.ok(Map.of("id", post.getId()));
+    }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<?> deleteAll(HttpServletRequest httpRequest) {
+        if (!isAdmin(httpRequest)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "어드민 권한이 필요합니다."));
+        }
+        communityService.deleteAll();
+        return ResponseEntity.ok(Map.of("message", "전체 삭제 완료"));
     }
 
     @DeleteMapping("/{id}")

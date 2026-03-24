@@ -67,6 +67,11 @@ public class CommunityService {
     }
 
     @Transactional
+    public void deleteAll() {
+        postRepository.deleteAll();
+    }
+
+    @Transactional
     public CommunityComment addComment(Long postId, CommentRequest request, String memberUsername) {
         CommunityComment comment = CommunityComment.builder()
                 .post(findById(postId))

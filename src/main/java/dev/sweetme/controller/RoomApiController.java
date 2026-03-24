@@ -190,6 +190,15 @@ public class RoomApiController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/all")
+    public ResponseEntity<?> deleteAll(HttpServletRequest request) {
+        if (!SessionHelper.isAdmin(request)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "어드민 권한이 필요합니다."));
+        }
+        roomService.deleteAll();
+        return ResponseEntity.ok(Map.of("message", "전체 삭제 완료"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id, HttpServletRequest request) {
         String username = SessionHelper.getUsername(request);

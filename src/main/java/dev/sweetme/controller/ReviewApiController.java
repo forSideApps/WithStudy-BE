@@ -189,6 +189,20 @@ public class ReviewApiController {
         }
     }
 
+    @DeleteMapping("/exchanges/{exchangeId}")
+    public ResponseEntity<?> cancelExchange(@PathVariable Long exchangeId, HttpServletRequest request) {
+        String username = getSessionUsername(request);
+        if (username == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+        try {
+            reviewService.cancelExchange(exchangeId, username);
+            return ResponseEntity.ok(Map.of("message", "서로보기 요청을 취소했습니다."));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id, HttpServletRequest request) {
         String username = getSessionUsername(request);
