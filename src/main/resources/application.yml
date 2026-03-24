@@ -33,6 +33,12 @@ server:
   tomcat:
     uri-encoding: UTF-8
     max-http-form-post-size: 2MB    # form POST 요청 크기 제한
+  servlet:
+    session:
+      timeout: 2h                   # 세션 유효 시간 2시간
+      cookie:
+        http-only: true
+        same-site: lax
   # ── 에러 응답 정보 최소화 ────────────────────────────────────────────────
   error:
     include-message: never          # 에러 message 필드 숨김

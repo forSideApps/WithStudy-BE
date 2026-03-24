@@ -14,6 +14,7 @@ import dev.sweetme.repository.ReviewExchangeRepository;
 import dev.sweetme.repository.ReviewRepository;
 import dev.sweetme.repository.RoomApplicationRepository;
 import dev.sweetme.repository.RoomRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -71,11 +72,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req, HttpSession session) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req, HttpServletRequest httpRequest) {
         Member member = memberRepository.findByUsername(req.username()).orElse(null);
         if (member == null || !passwordEncoder.matches(req.password(), member.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("message", "아이디 또는 비밀번호가 올바르지 않습니다."));
         }
+        // 세션 고정 공격 방지: 기존 세션 무효화 후 새 세션 생성
+        HttpSession old = httpRequest.getSession(false);
+        if (old != null) old.invalidate();
+        HttpSession session = httpRequest.getSession(true);
         session.setAttribute("member_username", member.getUsername());
         session.setAttribute("member_role", member.getRole().name());
         return ResponseEntity.ok(new MeResponse(
@@ -84,14 +89,16 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<?> logout(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session != null) session.invalidate();
         return ResponseEntity.ok(Map.of("message", "로그아웃되었습니다."));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> me(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         return memberRepository.findByUsername(username)
                 .<ResponseEntity<?>>map(m -> ResponseEntity.ok(new MeResponse(
@@ -101,8 +108,9 @@ public class AuthController {
     }
 
     @GetMapping("/me/rooms")
-    public ResponseEntity<?> myRooms(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> myRooms(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         List<RoomSummaryDto> rooms = roomRepository.findByMemberUsernameOrderByCreatedAtDesc(username)
                 .stream().map(r -> RoomSummaryDto.from(r, logoBaseUrl())).toList();
@@ -110,8 +118,9 @@ public class AuthController {
     }
 
     @GetMapping("/me/reviews")
-    public ResponseEntity<?> myReviews(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> myReviews(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         List<ReviewSummaryDto> reviews = reviewRepository.findByMemberUsernameOrderByCreatedAtDesc(username)
                 .stream().map(ReviewSummaryDto::from).toList();
@@ -119,8 +128,9 @@ public class AuthController {
     }
 
     @GetMapping("/me/applications")
-    public ResponseEntity<?> myApplications(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> myApplications(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         List<MyApplicationDto> apps = roomApplicationRepository.findByMemberUsernameOrderByCreatedAtDesc(username)
                 .stream().map(a -> new MyApplicationDto(
@@ -136,8 +146,9 @@ public class AuthController {
     }
 
     @GetMapping("/me/posts")
-    public ResponseEntity<?> myPosts(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> myPosts(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         List<PostSummaryDto> posts = communityPostRepository.findByMemberUsernameOrderByCreatedAtDesc(username)
                 .stream().map(PostSummaryDto::from).toList();
@@ -145,8 +156,9 @@ public class AuthController {
     }
 
     @GetMapping("/me/exchanges")
-    public ResponseEntity<?> myExchanges(HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> myExchanges(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
 
         List<Long> myReviewIds = reviewRepository.findByMemberUsernameOrderByCreatedAtDesc(username)
@@ -194,8 +206,9 @@ public class AuthController {
 
     @PutMapping("/profile")
     @Transactional
-    public ResponseEntity<?> updateProfile(@RequestBody ProfileRequest req, HttpSession session) {
-        String username = (String) session.getAttribute("member_username");
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileRequest req, HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        String username = session != null ? (String) session.getAttribute("member_username") : null;
         if (username == null) return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         memberRepository.findByUsername(username).ifPresent(m -> m.updateProfile(
                 req.jobRole(), req.careerLevel(), req.algoGrade()));

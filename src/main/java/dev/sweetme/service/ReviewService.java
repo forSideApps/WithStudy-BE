@@ -125,7 +125,7 @@ public class ReviewService {
         exchange.accept();
     }
 
-    /** 서로보기 거절: 교환 레코드 삭제 */
+    /** 서로보기 거절: 이력 보존을 위해 REJECTED 상태로 변경 */
     @Transactional
     public void rejectExchange(Long exchangeId, String username) {
         ReviewExchange exchange = exchangeRepository.findById(exchangeId)
@@ -134,7 +134,7 @@ public class ReviewService {
         if (!username.equals(targetReview.getMemberUsername())) {
             throw new SecurityException("거절 권한이 없습니다.");
         }
-        exchangeRepository.delete(exchange);
+        exchange.reject();
     }
 
     @Transactional
@@ -205,6 +205,11 @@ public class ReviewService {
             }
         }
         reviewCommentRepository.delete(comment);
+    }
+
+    public boolean isOwner(Long reviewId, String username) {
+        if (username == null) return false;
+        return username.equals(findById(reviewId).getMemberUsername());
     }
 
     @Transactional

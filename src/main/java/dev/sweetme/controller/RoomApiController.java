@@ -192,7 +192,10 @@ public class RoomApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id, HttpServletRequest request) {
-        if (!SessionHelper.isAdmin(request)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        String username = SessionHelper.getUsername(request);
+        if (!SessionHelper.isAdmin(request) && !roomService.isOwner(id, username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         roomService.delete(id);
         return ResponseEntity.ok().build();
     }

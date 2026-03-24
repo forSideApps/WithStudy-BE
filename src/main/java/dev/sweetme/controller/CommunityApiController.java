@@ -63,7 +63,8 @@ public class CommunityApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id, HttpServletRequest httpRequest) {
-        if (!isAdmin(httpRequest)) {
+        String username = getSessionUsername(httpRequest);
+        if (!isAdmin(httpRequest) && !communityService.isOwner(id, username)) {
             return ResponseEntity.status(403).build();
         }
         communityService.deletePost(id);

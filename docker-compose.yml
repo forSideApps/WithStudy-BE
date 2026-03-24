@@ -7,10 +7,13 @@ services:
       - "21001:21002"
       # 21003(Actuator)은 외부 미노출: 컨테이너 내부에서만 접근 가능
     environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - TNS_ADMIN=/wallet  # Oracle JDBC가 tnsnames.ora, ojdbc.properties 등 wallet 파일을 찾는 디렉토리
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
       - ./wallet:/wallet:ro
+      - /Users/goodgid/.oci/oci_api_key.pem:/root/.oci/oci_api_key.pem:ro
+      - ./oci_docker_config:/root/.oci/config:ro
     restart: unless-stopped

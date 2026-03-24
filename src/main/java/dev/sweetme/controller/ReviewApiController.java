@@ -191,7 +191,10 @@ public class ReviewApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id, HttpServletRequest request) {
-        if (!isAdmin(request)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        String username = getSessionUsername(request);
+        if (!isAdmin(request) && !reviewService.isOwner(id, username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         reviewService.delete(id);
         return ResponseEntity.ok().build();
     }

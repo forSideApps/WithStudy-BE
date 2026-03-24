@@ -56,6 +56,11 @@ public class CommunityService {
         return postRepository.save(post);
     }
 
+    public boolean isOwner(Long postId, String username) {
+        if (username == null) return false;
+        return username.equals(findById(postId).getMemberUsername());
+    }
+
     @Transactional
     public void deletePost(Long id) {
         postRepository.delete(findById(id));

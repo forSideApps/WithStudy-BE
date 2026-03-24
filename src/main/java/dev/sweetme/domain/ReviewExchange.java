@@ -39,4 +39,8 @@ public class ReviewExchange {
     public void accept() {
         this.status = ExchangeStatus.ACCEPTED;
     }
+
+    public void reject() {
+        this.status = ExchangeStatus.REJECTED;
+    }
 }

@@ -34,14 +34,21 @@ public class OciStorageService {
     private ObjectStorageClient storageClient;
 
     @PostConstruct
-    public void init() throws IOException {
-        ConfigFileReader.ConfigFile config = ConfigFileReader.parse(configFile, profile);
-        var provider = new ConfigFileAuthenticationDetailsProvider(config);
-        storageClient = ObjectStorageClient.builder().build(provider);
-        log.info("OCI Object Storage 클라이언트 초기화 완료 (namespace={}, bucket={})", namespace, bucket);
+    public void init() {
+        try {
+            ConfigFileReader.ConfigFile config = ConfigFileReader.parse(configFile, profile);
+            var provider = new ConfigFileAuthenticationDetailsProvider(config);
+            storageClient = ObjectStorageClient.builder().build(provider);
+            log.info("OCI Object Storage 클라이언트 초기화 완료 (namespace={}, bucket={})", namespace, bucket);
+        } catch (Exception e) {
+            log.warn("OCI Object Storage 초기화 실패 - 파일 업로드 기능이 비활성화됩니다. (config={}, reason={})", configFile, e.getMessage());
+        }
     }
 
     public String upload(String objectName, MultipartFile file) throws IOException {
+        if (storageClient == null) {
+            throw new IllegalStateException("OCI 스토리지가 초기화되지 않았습니다. 설정을 확인하세요.");
+        }
         PutObjectRequest request = PutObjectRequest.builder()
                 .namespaceName(namespace)
                 .bucketName(bucket)
