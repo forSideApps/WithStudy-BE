@@ -1,8 +1,8 @@
 services:
   app:
     build: .
-    image: interview-study:latest
-    container_name: interview-app
+    image: sweetme:latest
+    container_name: sweetme-app
     ports:
       - "21001:21002"
       # 21003(Actuator)은 외부 미노출: 컨테이너 내부에서만 접근 가능
