@@ -6,6 +6,7 @@ import dev.sweetme.domain.enums.JobRole;
 import dev.sweetme.domain.enums.RoomStatus;
 import dev.sweetme.dto.RoomCreateRequest;
 import dev.sweetme.dto.RoomUpdateRequest;
+import dev.sweetme.repository.RoomApplicationRepository;
 import dev.sweetme.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomApplicationRepository roomApplicationRepository;
     private final CompanyService companyService;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -106,7 +108,8 @@ public class RoomService {
 
     @Transactional
     public void deleteAll() {
-        roomRepository.deleteAll();
+        roomApplicationRepository.deleteAllInBatch();
+        roomRepository.deleteAllInBatch();
     }
 
     private RoomStatus parseStatus(String value) {

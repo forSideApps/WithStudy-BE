@@ -68,7 +68,8 @@ public class CommunityService {
 
     @Transactional
     public void deleteAll() {
-        postRepository.deleteAll();
+        commentRepository.deleteAllInBatch();
+        postRepository.deleteAllInBatch();
     }
 
     @Transactional
