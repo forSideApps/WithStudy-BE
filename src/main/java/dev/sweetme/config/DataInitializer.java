@@ -73,7 +73,8 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         // 방 목데이터
-        boolean roomNeedsReseed = roomRepository.count() == 0;
+        boolean roomNeedsReseed = roomRepository.count() == 0 ||
+            roomRepository.findAll().stream().noneMatch(r -> "소마 15기 면접 집중 스터디".equals(r.getTitle()));
         if (roomNeedsReseed) {
             roomRepository.deleteAll();
             String pw = passwordEncoder.encode("1234");
@@ -96,7 +97,8 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         // 커뮤니티 목데이터 — 조회수·댓글 포함
-        boolean needsReseed = communityPostRepository.count() == 0;
+        boolean needsReseed = communityPostRepository.count() == 0 ||
+            communityPostRepository.findAll().stream().noneMatch(p -> "취업 준비하면서 멘탈 관리 어떻게 하세요?".equals(p.getTitle()));
         if (needsReseed) {
             communityPostRepository.deleteAll();
 
