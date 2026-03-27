@@ -7,7 +7,6 @@ import dev.sweetme.dto.ReviewUpdateRequest;
 import dev.sweetme.dto.response.ReviewDetailDto;
 import dev.sweetme.dto.response.ReviewSummaryDto;
 import dev.sweetme.service.ReviewService;
-import dev.sweetme.util.SessionHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
-public class ReviewApiController {
+public class ReviewApiController extends BaseApiController {
 
     private final ReviewService reviewService;
 
@@ -213,11 +212,4 @@ public class ReviewApiController {
         return ResponseEntity.ok().build();
     }
 
-    private boolean isAdmin(HttpServletRequest request) {
-        return SessionHelper.isAdmin(request);
-    }
-
-    private String getSessionUsername(HttpServletRequest request) {
-        return SessionHelper.getUsername(request);
-    }
 }

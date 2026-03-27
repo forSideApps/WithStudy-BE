@@ -6,11 +6,11 @@ import dev.sweetme.dto.RoomUpdateRequest;
 import dev.sweetme.dto.response.ApplicationDto;
 import dev.sweetme.dto.response.ManageDto;
 import dev.sweetme.dto.response.RoomDetailDto;
+import dev.sweetme.domain.enums.ApplicationStatus;
 import dev.sweetme.dto.response.RoomSummaryDto;
 import dev.sweetme.service.OciStorageService;
 import dev.sweetme.service.RoomApplicationService;
 import dev.sweetme.service.RoomService;
-import dev.sweetme.util.SessionHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
-public class RoomApiController {
+public class RoomApiController extends BaseApiController {
 
     private final RoomService roomService;
     private final RoomApplicationService roomApplicationService;
@@ -85,7 +85,7 @@ public class RoomApiController {
             @RequestParam Long themeId,
             @RequestBody RoomCreateRequest request,
             HttpServletRequest httpRequest) {
-        String memberUsername = SessionHelper.getUsername(httpRequest);
+        String memberUsername = getSessionUsername(httpRequest);
         if (memberUsername != null) {
             request.setCreatorNickname(memberUsername);
         }
@@ -98,7 +98,7 @@ public class RoomApiController {
             @PathVariable Long id,
             @RequestBody ApplicationRequest request,
             HttpServletRequest httpRequest) {
-        String memberUsername = SessionHelper.getUsername(httpRequest);
+        String memberUsername = getSessionUsername(httpRequest);
         if (memberUsername != null) request.setApplicantName(memberUsername);
         roomApplicationService.apply(id, request, memberUsername);
         return ResponseEntity.ok().build();
@@ -126,8 +126,8 @@ public class RoomApiController {
         List<ApplicationDto> appDtos = applications.stream()
                 .map(ApplicationDto::from)
                 .toList();
-        long pendingCount = appDtos.stream().filter(a -> "PENDING".equals(a.getStatus())).count();
-        long approvedCount = appDtos.stream().filter(a -> "APPROVED".equals(a.getStatus())).count();
+        long pendingCount = appDtos.stream().filter(a -> ApplicationStatus.PENDING.name().equals(a.getStatus())).count();
+        long approvedCount = appDtos.stream().filter(a -> ApplicationStatus.APPROVED.name().equals(a.getStatus())).count();
         ManageDto dto = new ManageDto(
                 RoomDetailDto.from(room, logoBaseUrl(), true),
                 appDtos,
@@ -192,7 +192,7 @@ public class RoomApiController {
 
     @DeleteMapping("/all")
     public ResponseEntity<?> deleteAll(HttpServletRequest request) {
-        if (!SessionHelper.isAdmin(request)) {
+        if (!isAdmin(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "어드민 권한이 필요합니다."));
         }
         roomService.deleteAll();
@@ -201,8 +201,8 @@ public class RoomApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id, HttpServletRequest request) {
-        String username = SessionHelper.getUsername(request);
-        if (!SessionHelper.isAdmin(request) && !roomService.isOwner(id, username)) {
+        String username = getSessionUsername(request);
+        if (!isAdmin(request) && !roomService.isOwner(id, username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         roomService.delete(id);
@@ -210,11 +210,7 @@ public class RoomApiController {
     }
 
     private boolean canManage(Long roomId, String password, HttpServletRequest request) {
-        if (roomService.isOwner(roomId, SessionHelper.getUsername(request))) return true;
+        if (roomService.isOwner(roomId, getSessionUsername(request))) return true;
         return roomService.verifyPassword(roomId, password);
-    }
-
-    private <T> ResponseEntity<T> unauthorized() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

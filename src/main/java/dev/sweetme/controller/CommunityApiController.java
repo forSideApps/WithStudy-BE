@@ -6,7 +6,6 @@ import dev.sweetme.dto.CommunityPostRequest;
 import dev.sweetme.dto.response.PostDetailDto;
 import dev.sweetme.dto.response.PostSummaryDto;
 import dev.sweetme.service.CommunityService;
-import dev.sweetme.util.SessionHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/community")
 @RequiredArgsConstructor
-public class CommunityApiController {
+public class CommunityApiController extends BaseApiController {
 
     private final CommunityService communityService;
 
@@ -53,7 +52,7 @@ public class CommunityApiController {
             HttpServletRequest httpRequest) {
         if (PostCategory.NOTICE == request.getCategory()) {
             if (!isAdmin(httpRequest)) {
-                return ResponseEntity.status(403).body(Map.of("message", "공지사항은 어드민만 작성할 수 있습니다."));
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "공지사항은 어드민만 작성할 수 있습니다."));
             }
         }
         String memberUsername = getSessionUsername(httpRequest);
@@ -75,7 +74,7 @@ public class CommunityApiController {
     public ResponseEntity<Void> deletePost(@PathVariable Long id, HttpServletRequest httpRequest) {
         String username = getSessionUsername(httpRequest);
         if (!isAdmin(httpRequest) && !communityService.isOwner(id, username)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         communityService.deletePost(id);
         return ResponseEntity.ok().build();
@@ -118,11 +117,4 @@ public class CommunityApiController {
         return ResponseEntity.ok().build();
     }
 
-    private String getSessionUsername(HttpServletRequest request) {
-        return SessionHelper.getUsername(request);
-    }
-
-    private boolean isAdmin(HttpServletRequest request) {
-        return SessionHelper.isAdmin(request);
-    }
 }
