@@ -5,7 +5,6 @@ import dev.sweetme.domain.Member;
 import dev.sweetme.domain.enums.MemberRole;
 import dev.sweetme.repository.CompanyRepository;
 import dev.sweetme.repository.MemberRepository;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -14,6 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
 
 @Slf4j
@@ -24,19 +26,24 @@ public class DataInitializer implements ApplicationRunner {
     private final CompanyRepository companyRepository;
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final EntityManager em;
+    private final DataSource dataSource;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        // 댓글 content 컬럼 확장 (1000 → 4000)
-        for (String table : List.of("review_comment", "community_comment")) {
-            try {
-                em.createNativeQuery("ALTER TABLE " + table + " MODIFY content CLOB").executeUpdate();
-                log.info("{}.content 컬럼 CLOB으로 확장", table);
-            } catch (Exception e) {
-                log.debug("{}.content ALTER 건너뜀: {}", table, e.getMessage());
+        // 댓글 content 컬럼 확장 — DataSource 직접 사용 (JPA 트랜잭션 밖)
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+            for (String table : List.of("review_comment", "community_comment")) {
+                try {
+                    stmt.execute("ALTER TABLE " + table + " MODIFY content CLOB");
+                    log.info("{}.content 컬럼 CLOB으로 확장", table);
+                } catch (Exception e) {
+                    log.debug("{}.content ALTER 건너뜀: {}", table, e.getMessage());
+                }
             }
+        } catch (Exception e) {
+            log.debug("content 컬럼 ALTER 실패: {}", e.getMessage());
         }
 
         // admin 계정 초기화
