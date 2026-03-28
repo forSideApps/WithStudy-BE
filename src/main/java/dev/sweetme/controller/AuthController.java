@@ -94,23 +94,8 @@ public class AuthController extends BaseApiController {
         @NotBlank String password
     ) {}
 
-    public record ProfileRequest(String jobRole, String careerLevel, String algoGrade) {}
-
     public record MeResponse(
         String username, String role, String email,
         String jobRole, String careerLevel, String algoGrade
-    ) {}
-
-    public record MyApplicationDto(
-        Long id, Long roomId, String roomTitle, String themeName,
-        String status, String statusDisplay, java.time.LocalDateTime createdAt
-    ) {}
-
-    public record ExchangeDto(
-        Long id, String direction,
-        Long myReviewId, String myReviewTitle,
-        Long theirReviewId, String theirReviewTitle,
-        String theirUsername, java.time.LocalDateTime createdAt,
-        String status
     ) {}
 }
