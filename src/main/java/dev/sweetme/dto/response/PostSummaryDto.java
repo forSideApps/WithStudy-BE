@@ -31,7 +31,7 @@ public class PostSummaryDto {
                 post.getTitle(),
                 post.getAuthorName(),
                 post.getViewCount(),
-                post.getComments().size(),
+                post.getCommentCount(),
                 post.getCreatedAt()
         );
     }

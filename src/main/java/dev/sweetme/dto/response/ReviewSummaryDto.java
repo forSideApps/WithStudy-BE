@@ -35,7 +35,7 @@ public class ReviewSummaryDto {
         this.title = r.getTitle();
         this.authorName = r.getAuthorName();
         this.viewCount = r.getViewCount();
-        this.commentCount = r.getComments().size();
+        this.commentCount = r.getCommentCount();
         this.createdAt = r.getCreatedAt();
     }
 

@@ -6,6 +6,7 @@ import dev.sweetme.domain.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -67,6 +68,12 @@ public class Room {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Formula("(SELECT COUNT(*) FROM room_application a WHERE a.room_id = id AND a.status = 'PENDING')")
+    private long pendingCount;
+
+    @Formula("(SELECT COUNT(*) FROM room_application a WHERE a.room_id = id AND a.status = 'APPROVED')")
+    private long approvedCount;
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<RoomApplication> applications = new ArrayList<>();
@@ -90,14 +97,10 @@ public class Room {
     }
 
     public long getPendingCount() {
-        return applications.stream()
-                .filter(a -> a.getStatus() == ApplicationStatus.PENDING)
-                .count();
+        return pendingCount;
     }
 
     public long getApprovedCount() {
-        return applications.stream()
-                .filter(a -> a.getStatus() == ApplicationStatus.APPROVED)
-                .count();
+        return approvedCount;
     }
 }

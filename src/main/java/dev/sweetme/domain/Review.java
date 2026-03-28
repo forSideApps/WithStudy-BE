@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public class Review {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Formula("(SELECT COUNT(*) FROM review_comment c WHERE c.review_id = id)")
+    private int commentCount;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
     @BatchSize(size = 15)

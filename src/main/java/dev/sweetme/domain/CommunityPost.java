@@ -3,6 +3,7 @@ package dev.sweetme.domain;
 import dev.sweetme.domain.enums.PostCategory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ public class CommunityPost {
     @Builder.Default
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Formula("(SELECT COUNT(*) FROM community_comment c WHERE c.post_id = id)")
+    private int commentCount;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @OrderBy("createdAt ASC")
